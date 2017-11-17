@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+# frozen_string_literal: true
+
+require 'roo'
+
+column_to_s = Hash.new { |h, k| h[k] = h[k-1].succ }
+column_to_s[1] = 'A'
+
+pattern = Regexp.new(ARGV.shift)
+ARGV.each do |path|
+  xlsx = Roo::Spreadsheet.open(path)
+  xlsx.each_with_pagename do |name, sheet|
+    sheet.each_row_streaming do |row|
+      row.each do |cell|
+        if pattern =~ cell.value.to_s
+          c = column_to_s[cell.coordinate.column]
+          r = cell.coordinate.row
+          puts "#{path}:#{name}:#{c}#{r}:#{cell.value.inspect}"
+        end
+      end
+    end
+  end
+end
