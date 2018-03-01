@@ -13,10 +13,14 @@ ARGV.each do |path|
   xlsx.each_with_pagename do |name, sheet|
     sheet.each_row_streaming do |row|
       row.each do |cell|
-        if pattern =~ cell.value.to_s
+        value = cell.value.to_s
+        if pattern =~ value
           c = column_to_s[cell.coordinate.column]
           r = cell.coordinate.row
-          puts "#{path}:#{name}:#{c}#{r}:#{cell.value.inspect}"
+          if STDOUT.tty?
+            value.gsub!(pattern) { "\e[1;4m#$&\e[m" }
+          end
+          puts "#{path}:#{name}:#{c}#{r}:#{value}"
         end
       end
     end
